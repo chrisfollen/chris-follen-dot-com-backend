@@ -68,7 +68,7 @@ app.post('/journal', (request, response) => {
 
 app.patch('/journal/:slug', (request, response) => {
     const info = request.body
-    database('journal20')
+    database('articles')
         .where({slug: request.params.slug})
         .update(info)
         .returning('*')
@@ -76,7 +76,7 @@ app.patch('/journal/:slug', (request, response) => {
 })
 
 app.delete('/journal/:slug', (request, response) => {
-    database('journal20')
+    database('articles')
         .where({slug: request.params.slug})
         .delete()
         .then(() => response.status(204))
