@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
 const port = 4000
+const auth = require('./private')
 
 const knex = require('knex')
 const config = require('./knexfile')['development']
 const database = knex(config)
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({extended: false}))
@@ -82,8 +85,64 @@ app.delete('/journal/:slug', (request, response) => {
         .then(() => response.status(204))
 })
 
-app.get('/fun', (request, response) => {
-    response.send({message: 'whatever'})
+// app.delete('/journal/:id', (request, response) => {
+//     database('articles')
+//         .where({id: request.params.id})
+//         .delete()
+//         .then(() => response.status(204))
+// })
+
+
+const createUser = (request, response) => {
+    const { username, password } = request.body
+
+    bcrypt.hash(password, 12)
+        .then(hashedPassword => {
+            return database('tacos').insert({
+                username,
+                password_digest: hashedPassword
+            }).returning("*")
+            }).then(tacos => {
+                response.json({user: tacos[0]})
+        })
+}
+
+app.post("/users", createUser)
+
+
+const login = (request, response) => {
+    const { username, password } = request.body
+    database('tacos').select().where({ username }).first()
+        .then(user => {
+            if (!user) throw new Error("No user by that name!")
+
+            return bcrypt.compare(password, user.password_digest)
+                .then(passwordDidMatch => {
+                    if (!passwordDidMatch) throw new Error ("Wrong password, guy")
+                    return user
+                })
+        }).then(user => {
+            const secret = "HEREATOKENFORYA"
+            jwt.sign(user, secret, (error, token) => {
+                if (error) throw new Error("Prolem signing jwt")
+                response.json({ token })
+            })
+        }).catch(error => {
+            response.json({
+                error: error.message
+            })
+        })
+}
+
+app.post("/login", login)
+
+
+
+
+app.get('/users', (request, response) => {
+    database('tacos')
+        .then(users => response.json(users))
 })
+
 
 app.listen(port, () => console.log(`listening on port ${port}`))
