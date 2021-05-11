@@ -1,5 +1,8 @@
 const pg = require('pg')
-pg.defaults.ssl = true
+pg.defaults.ssl = { 
+  require: true, 
+  rejectUnauthorized: false 
+}
 
 module.exports = {
 
@@ -13,7 +16,6 @@ module.exports = {
     production: {
       client: 'pg',
       connection: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
     }
 
 }
