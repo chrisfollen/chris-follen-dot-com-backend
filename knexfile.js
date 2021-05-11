@@ -1,3 +1,6 @@
+const pg = require('pg')
+pg.defaults.ssl = true
+
 module.exports = {
 
   // development: {
@@ -11,7 +14,6 @@ module.exports = {
       client: 'pg',
       connection: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false }
-    
     }
 
 }
