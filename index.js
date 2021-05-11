@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const port = process.env.PORT
+const port = process.env.PORT || 4000
 
 const knex = require('knex')
 const config = require('./knexfile')[process.env.NODE_ENV || 'development']
