@@ -5,5 +5,14 @@ module.exports = {
     connection: {
       filename: 'postgres:///journal20'
     }
-  }
+  },
+
+    // production: {
+  //   client: 'pg',
+  //   connection: {
+  //     database: 'my_db',
+  //     connection: process.env.DATABASE_URL
+  //   }
+  // }
+  
 }

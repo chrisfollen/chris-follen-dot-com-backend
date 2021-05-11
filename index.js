@@ -1,10 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
-const port = 4000
-const auth = require('./private')
+const port = process.env.PORT
 
 const knex = require('knex')
-const config = require('./knexfile')['development']
+const config = require('./knexfile')[process.env.NODE_ENV || 'development']
 const database = knex(config)
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -15,6 +15,24 @@ app.use(bodyParser.json())
 
 const cors = require('cors');
 app.use(cors());
+
+const auth = (request, response, next) => {
+
+    const token = request.headers.authorization
+
+    if (!token) {
+        response.sendStatus(401)
+    }
+
+    try {
+        const tokenOK = jwt.verify(token, process.env.SECRET)
+    } catch(error) {
+        response.sendStatus(403)
+    }
+
+    next()
+}
+
 
 app.get('/journal', (request, response) => {
     database('articles')
@@ -27,7 +45,7 @@ app.get('/journal/:slug', (request, response) => {
         .then(articles => response.json(articles[0]))
 })
 
-app.post('/journal', (request, response) => {
+app.post('/journal', auth, (request, response) => {
     database('articles')
         .insert({
             title: request.body.title,
@@ -69,7 +87,7 @@ app.post('/journal', (request, response) => {
         .then(articles => response.json(articles[0]))
 })
 
-app.patch('/journal/:slug', (request, response) => {
+app.patch('/journal/:slug', auth, (request, response) => {
     const info = request.body
     database('articles')
         .where({slug: request.params.slug})
@@ -78,7 +96,7 @@ app.patch('/journal/:slug', (request, response) => {
         .then(articles => response.json(articles[0]))
 })
 
-app.delete('/journal/:slug', (request, response) => {
+app.delete('/journal/:slug', auth, (request, response) => {
     database('articles')
         .where({slug: request.params.slug})
         .delete()
@@ -87,6 +105,13 @@ app.delete('/journal/:slug', (request, response) => {
 
 // app.delete('/journal/:id', (request, response) => {
 //     database('articles')
+//         .where({id: request.params.id})
+//         .delete()
+//         .then(() => response.status(204))
+// })
+
+// app.delete('/users/:id', (request, response) => {
+//     database('tacos')
 //         .where({id: request.params.id})
 //         .delete()
 //         .then(() => response.status(204))
@@ -109,7 +134,6 @@ const createUser = (request, response) => {
 
 app.post("/users", createUser)
 
-
 const login = (request, response) => {
     const { username, password } = request.body
     database('tacos').select().where({ username }).first()
@@ -122,8 +146,8 @@ const login = (request, response) => {
                     return user
                 })
         }).then(user => {
-            const secret = "HEREATOKENFORYA"
-            jwt.sign(user, secret, (error, token) => {
+            
+            jwt.sign(user, process.env.SECRET, (error, token) => {
                 if (error) throw new Error("Prolem signing jwt")
                 response.json({ token })
             })
@@ -136,13 +160,10 @@ const login = (request, response) => {
 
 app.post("/login", login)
 
-
-
-
-app.get('/users', (request, response) => {
-    database('tacos')
-        .then(users => response.json(users))
-})
+// app.get('/users', (request, response) => {
+//     database('tacos')
+//         .then(users => response.json(users))
+// })
 
 
 app.listen(port, () => console.log(`listening on port ${port}`))
