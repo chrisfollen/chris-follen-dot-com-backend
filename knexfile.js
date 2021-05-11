@@ -7,12 +7,12 @@ module.exports = {
     }
   },
 
-    // production: {
-  //   client: 'pg',
-  //   connection: {
-  //     database: 'my_db',
-  //     connection: process.env.DATABASE_URL
-  //   }
-  // }
-  
+    production: {
+    client: 'pg',
+    connection: {
+      // database: 'my_db',
+      connection: process.env.DATABASE_URL
+    }
+  }
+
 }
