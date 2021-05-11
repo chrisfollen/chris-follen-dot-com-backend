@@ -4,7 +4,7 @@ const app = express()
 const port = process.env.PORT
 
 const knex = require('knex')
-const config = require('./knexfile')[process.env.DB_ENV || 'development']
+const config = require('./knexfile')[process.env.NODE_ENV || 'development']
 const database = knex(config)
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
