@@ -118,21 +118,21 @@ app.delete('/journal/:slug', auth, (request, response) => {
 // })
 
 
-const createUser = (request, response) => {
-    const { username, password } = request.body
+// const createUser = (request, response) => {
+//     const { username, password } = request.body
 
-    bcrypt.hash(password, 12)
-        .then(hashedPassword => {
-            return database('tacos').insert({
-                username,
-                password_digest: hashedPassword
-            }).returning("*")
-            }).then(tacos => {
-                response.json({user: tacos[0]})
-        })
-}
+//     bcrypt.hash(password, 12)
+//         .then(hashedPassword => {
+//             return database('tacos').insert({
+//                 username,
+//                 password_digest: hashedPassword
+//             }).returning("*")
+//             }).then(tacos => {
+//                 response.json({user: tacos[0]})
+//         })
+// }
 
-app.post("/users", createUser)
+// app.post("/users", createUser)
 
 const login = (request, response) => {
     const { username, password } = request.body
